@@ -275,7 +275,7 @@ class UFrameClient(object):
             else:
                 r = requests.get(url, timeout=self._timeout, verify=False)
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError) as e:
-            self._logger.error(e)
+            self._logger.error('{:s} - {:s}'.format(e, url))
             return
             
         self._status_code = r.status_code
