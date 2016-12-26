@@ -40,8 +40,10 @@ class UFrameClient(object):
         self._timeout = timeout
         self._api_username = api_username
         self._api_token = api_token
+        self._session = requests.Session()
         self._is_m2m = m2m
         self._instruments = []
+        self._subsites = []
         
         self._logger = logging.getLogger(__name__)
         
@@ -267,13 +269,13 @@ class UFrameClient(object):
         try:
             self._logger.debug('Sending GET request: {:s}\n'.format(url))
             if self._api_username and self._api_token:
-                r = requests.get(url,
+                r = self._session.get(url,
                     auth=(self._api_username,
                     self._api_token),
                     timeout=self._timeout,
                     verify=False)
             else:
-                r = requests.get(url, timeout=self._timeout, verify=False)
+                r = self._session.get(url, timeout=self._timeout, verify=False)
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError) as e:
             self._logger.error('{:s} - {:s}'.format(e, url))
             return
