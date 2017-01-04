@@ -9,14 +9,15 @@ import csv
 import datetime
 from m2m.UFrameClient import UFrameClient
 
+
 def main(args):
     '''Fetch all deployment events for the fully or partially qualified reference designator'''
-    
+
     # Translate the logging level string to numeric value
     log_level = getattr(logging, args.loglevel.upper())
     log_format = '%(asctime)s:%(module)s:%(levelname)s:%(message)s [line %(lineno)d]'
     logging.basicConfig(level=log_level, format=log_format)
-    
+
     # Environment
     # UFrame instance
     uframe_base_url = args.base_url
@@ -46,28 +47,30 @@ def main(args):
         all_deployments = [d for d in all_deployments if d['eventStopTime']]
 
     for d in all_deployments:
-        # Handle the inconsisent nature of the deployment asset management
+        # Handle the inconsistent nature of the deployment asset management
         # schema
         if type(d['referenceDesignator']) == dict:
             d['ref_des'] = '-'.join([d['referenceDesignator']['subsite'],
-                d['referenceDesignator']['node'],
-                d['referenceDesignator']['sensor']])
+                                     d['referenceDesignator']['node'],
+                                     d['referenceDesignator']['sensor']])
         else:
             d['ref_des'] = d['referenceDesignator']
 
         # Create the event start timestamp
         try:
-            d['eventStartTs'] = datetime.datetime.utcfromtimestamp(d['eventStartTime']/1000).strftime('%Y-%m-%dT%H:%M:%SZ')
+            d['eventStartTs'] = datetime.datetime.utcfromtimestamp(d['eventStartTime'] / 1000).strftime(
+                '%Y-%m-%dT%H:%M:%SZ')
         except ValueError as e:
             logging.warning(e)
             d['eventStartTs'] = None
 
         # Create the event start timestamp
         d['eventStopTs'] = None
-        if d['eventStopTime']: 
+        if d['eventStopTime']:
             d['active'] = False
             try:
-                d['eventStopTs'] = datetime.datetime.utcfromtimestamp(d['eventStopTime']/1000).strftime('%Y-%m-%dT%H:%M:%SZ')
+                d['eventStopTs'] = datetime.datetime.utcfromtimestamp(d['eventStopTime'] / 1000).strftime(
+                    '%Y-%m-%dT%H:%M:%SZ')
             except ValueError as e:
                 logging.warning(e)
                 d['eventStopTs'] = None
@@ -80,12 +83,12 @@ def main(args):
 
         csv_writer = csv.writer(sys.stdout)
         cols = ['ref_des',
-            'eventStartTs',
-            'eventStopTs',
-            'eventStartTime',
-            'eventStopTime',
-            'deploymentNumber',
-            'active']
+                'eventStartTs',
+                'eventStopTs',
+                'eventStartTime',
+                'eventStopTime',
+                'deploymentNumber',
+                'active']
         csv_writer.writerow(cols)
         for deployment in all_deployments:
             csv_writer.writerow([deployment[c] for c in cols])
@@ -95,34 +98,34 @@ def main(args):
 
     return 0
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description=main.__doc__)
     arg_parser.add_argument('ref_des',
-        type=str,
-        help='Fully-qualified instrument reference designator')
+                            type=str,
+                            help='Fully-qualified instrument reference designator')
     arg_parser.add_argument('-s', '--status',
-        dest='status',
-        type=str,
-        default='all',
-        choices=['active', 'inactive', 'all'],
-        help='Specify the status of the deployment <Default=all>')
+                            dest='status',
+                            type=str,
+                            default='all',
+                            choices=['active', 'inactive', 'all'],
+                            help='Specify the status of the deployment <Default=all>')
     arg_parser.add_argument('-b', '--baseurl',
-        dest='base_url',
-        type=str,
-        help='UFrame m2m base url beginning with https.  Taken from UFRAME_M2M_BASE_URL if not specified')
+                            dest='base_url',
+                            type=str,
+                            help='UFrame m2m base url beginning with https.  Taken from UFRAME_M2M_BASE_URL if not specified')
     arg_parser.add_argument('-t', '--timeout',
-        type=int,
-        default=120,
-        help='Request timeout, in seconds <Default=120>')
+                            type=int,
+                            default=120,
+                            help='Request timeout, in seconds <Default=120>')
     arg_parser.add_argument('-l', '--loglevel',
-        help='Verbosity level <Default=warning>',
-        type=str,
-        choices=['debug', 'info', 'warning', 'error', 'critical'],
-        default='warning')
+                            help='Verbosity level <Default=warning>',
+                            type=str,
+                            choices=['debug', 'info', 'warning', 'error', 'critical'],
+                            default='warning')
     arg_parser.add_argument('--csv',
-        help='Print results as csv records',
-        action='store_true')
+                            help='Print results as csv records',
+                            action='store_true')
 
     parsed_args = arg_parser.parse_args()
 
