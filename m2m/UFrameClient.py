@@ -287,7 +287,7 @@ class UFrameClient(object):
 
         self._status_code = r.status_code
         if self._status_code != HTTP_STATUS_OK:
-            self._logger.error('Request failed ({:s})'.format(r.reason))
+            self._logger.error('Request failed {:s} ({:s})'.format(url, r.reason))
             return
 
         self._response_headers = r.headers
