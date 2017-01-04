@@ -335,14 +335,17 @@ class UFrameClient(object):
             
         Optional kwargs:
             telemetry: telemetry type (Default is all telemetry types
-            time_delta_type: Type for calculating the subset start time, i.e.: years, months, weeks, days.  Must be a type kwarg accepted by dateutil.relativedelta'
+            time_delta_type: Type for calculating the subset start time, i.e.: years, months, weeks, days.  Must be a
+                type kwarg accepted by dateutil.relativedelta'
             time_delta_value: Positive integer value to subtract from the end time to get the start time for subsetting.
             begin_ts: ISO-8601 formatted datestring specifying the dataset start time
             end_ts: ISO-8601 formatted datestring specifying the dataset end time
             time_check: set to true (default) to ensure the request times fall within the stream data availability
-            exec_dpa: boolean value specifying whether to execute all data product algorithms to return L1/L2 parameters (Default is True)
+            exec_dpa: boolean value specifying whether to execute all data product algorithms to return L1/L2 parameters
+                (Default is True)
             application_type: 'netcdf' or 'json' (Default is 'netcdf')
-            provenance: boolean value specifying whether provenance information should be included in the data set (Default is True)
+            provenance: boolean value specifying whether provenance information should be included in the data set
+                (Default is True)
             limit: integer value ranging from -1 to 10000.  A value of -1 (default) results in a non-decimated dataset
             annotations: boolean value (True or False) specifying whether to include all dataset annotations
         """
@@ -404,9 +407,6 @@ class UFrameClient(object):
                     continue
 
                 # Figure out what we're doing for time
-                dt0 = None
-                dt1 = None
-
                 try:
                     stream_dt0 = parser.parse(instrument_stream['beginTime'])
                 except ValueError:
