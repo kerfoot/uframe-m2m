@@ -455,19 +455,19 @@ class UFrameClient(object):
                 if time_check:
                     if dt1 > stream_dt1:
                         self._logger.warning(
-                            'time_check ({:s}-{:s}): End time exceeds stream endTime ({:s} > {:s})'.format(
-                                ref_des, instrument_stream['stream'], ts1, instrument_stream['endTime']))
+                            '{:s}-{:s} time check - End time exceeds stream endTime'.format(
+                                ref_des, instrument_stream['stream']))
                         self._logger.warning(
-                            'time_check ({:s}-{:s}): Setting request end time to stream endTime'.format(
+                            '{:s}-{:s} time check - Setting request end time to stream endTime'.format(
                                 ref_des, instrument_stream['stream']))
                         ts1 = instrument_stream['endTime']
 
                     if dt0 < stream_dt0:
                         self._logger.warning(
-                            'time_check ({:s}-{:s}): Start time is earlier than stream beginTime ({:s} < {:s})'.format(
-                                ref_des, instrument_stream['stream'], ts0, instrument_stream['beginTime']))
+                            '{:s}-{:s} time check - Start time is earlier than stream beginTime'.format(
+                                ref_des, instrument_stream['stream']))
                         self._logger.warning(
-                            'time_check ({:s}-{:s}): Setting request begin time to stream beginTime'.format(
+                            '{:s}-{:s} time check -  Setting request begin time to stream beginTime'.format(
                                 ref_des, instrument_stream['stream']))
                         ts0 = instrument_stream['beginTime']
 
@@ -475,9 +475,9 @@ class UFrameClient(object):
                     dt0 = parser.parse(ts0)
                     dt1 = parser.parse(ts1)
                     if dt0 >= dt1:
-                        self._logger.error(
-                            '{:s}: Invalid time range specified ({:s} >= {:s})'.format(
-                                instrument_stream['stream'], ts0, ts1))
+                        self._logger.warning(
+                            '{:s}-{:s} - Invalid time range specified'.format(
+                                instrument, instrument_stream['stream']))
                         continue
 
                 # Create the url
