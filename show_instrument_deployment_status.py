@@ -46,13 +46,23 @@ def main(args):
         # Find all fully qualified reference designators
         all_deployments = client.fetch_instrument_deployments(instrument)
         if not all_deployments:
-            logger.debug('No instruments matching ref_des {:s}'.format(instrument))
+            logger.debug('No deployments found for instrument {:s}'.format(instrument))
             continue
     
         if args.status == 'active':
             all_deployments = [d for d in all_deployments if not d['eventStopTime']]
         elif args.status == 'inactive':
             all_deployments = [d for d in all_deployments if d['eventStopTime']]
+            
+        if not all_deployments:
+            if args.status != 'all':     
+                logger.debug('No {:s} deployments found for instrument {:s}'.format(args.status, instrument))
+                continue
+            
+        streams = client.fetch_instrument_streams(instrument)
+        if not streams:
+            logger.warning('No streams found for deployed instrument')
+            continue
     
         for d in all_deployments:
                 
@@ -63,11 +73,6 @@ def main(args):
                                         d['referenceDesignator']['sensor']])
             else:
                 d['ref_des'] = d['referenceDesignator']
-    
-            streams = client.fetch_instrument_streams(d['ref_des'])
-            if not streams:
-                logger.warning('No streams found for deployed instrument')
-                continue
                 
             # Deployment event must have a parseable start time
             if not d['eventStartTime']:
@@ -103,7 +108,7 @@ def main(args):
                 status['deployment_start_time'] = None
                 status['deployment_end_time'] = None
                 status['stream_start_time'] = stream['beginTime']
-                status['stream_end_time'] = stream['endTime'],
+                status['stream_end_time'] = stream['endTime']
                 status['stream_particle_count'] = stream['count']
                 
                 if not dt1:
@@ -125,9 +130,9 @@ def main(args):
                     
                 # Check stream endTime to make sure it's not before the deployment began
                 if st1 < dt0:
-                    status['has_particles'] = False
+                    status['deployment_has_particles'] = False
                 elif dt1 and st0 > dt1:
-                    status['has_particles'] = False
+                    status['deployment_has_particles'] = False
                     
                 # Set the request start_date and end_date to the deployment window
                 status['deployment_start_time'] = dt0.strftime('%Y-%m-%dT%H:%M:%S.%sZ')
