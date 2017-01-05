@@ -47,7 +47,7 @@ def main(args):
         all_deployments = client.fetch_instrument_deployments(instrument)
         if not all_deployments:
             logger.debug('No instruments matching ref_des {:s}'.format(instrument))
-            return 0
+            continue
     
         if args.status == 'active':
             all_deployments = [d for d in all_deployments if not d['eventStopTime']]
@@ -96,13 +96,15 @@ def main(args):
                 status = OrderedDict()
                 status['reference_designator'] = d['ref_des']
                 status['stream'] = stream['stream']
+                status['telemetry'] = stream['method']
                 status['deployment_number'] = d['deploymentNumber']
                 status['active'] = False
-                status['has_particles'] = True
+                status['deployment_has_particles'] = True
                 status['deployment_start_time'] = None
                 status['deployment_end_time'] = None
                 status['stream_start_time'] = stream['beginTime']
-                status['stream_end_time'] = stream['endTime']
+                status['stream_end_time'] = stream['endTime'],
+                status['stream_particle_count'] = stream['count']
                 
                 if not dt1:
                     status['active'] = True
@@ -122,7 +124,9 @@ def main(args):
                     continue
                     
                 # Check stream endTime to make sure it's not before the deployment began
-                if st1 < dt0 or st0 > dt1:
+                if st1 < dt0:
+                    status['has_particles'] = False
+                elif dt1 and st0 > dt1:
                     status['has_particles'] = False
                     
                 # Set the request start_date and end_date to the deployment window
