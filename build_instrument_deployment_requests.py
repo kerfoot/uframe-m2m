@@ -9,6 +9,8 @@ import csv
 import datetime
 from m2m.UFrameClient import UFrameClient
 import urllib
+import pytz
+from dateutil import parser
 
 
 def main(args):
@@ -56,7 +58,7 @@ def main(args):
 
     request_urls = []
     for d in all_deployments:
-
+            
         # Handle the inconsistent nature of the deployment asset management schema
         if type(d['referenceDesignator']) == dict:
             d['ref_des'] = '-'.join([d['referenceDesignator']['subsite'],
@@ -65,48 +67,87 @@ def main(args):
         else:
             d['ref_des'] = d['referenceDesignator']
 
-        logger.debug('{:s} Deployment {:0.0f}'.format(d['ref_des'], d['deploymentNumber']))
+        logger.info('{:s} (Deployment {:0.0f})'.format(d['ref_des'], d['deploymentNumber']))
 
-        # Create the event start timestamp
+        streams = client.fetch_instrument_streams(d['ref_des'])
+        if not streams:
+            logger.warning('No streams found for deployed instrument')
+            continue
+            
+        # Deployment event must have a parseable start time
+        if not d['eventStartTime']:
+            logger.warning('Deployment event has no eventStartTime')
+            continue
+            
+        # Parse eventStartTime
         try:
-            d['eventStartTs'] = datetime.datetime.utcfromtimestamp(d['eventStartTime'] / 1000).strftime(
-                '%Y-%m-%dT%H:%M:%SZ')
+            dt0 = datetime.datetime.utcfromtimestamp(d['eventStartTime']/1000).replace(tzinfo=pytz.UTC)
         except ValueError as e:
-            logging.warning(e)
+            logging.error(e)
             continue
-
-        # Create the event start timestamp
-        d['eventStopTs'] = None
+        # Parse eventStopTime if there is one
         if d['eventStopTime']:
-            d['active'] = False
             try:
-                d['eventStopTs'] = datetime.datetime.utcfromtimestamp(d['eventStopTime'] / 1000).strftime(
-                    '%Y-%m-%dT%H:%M:%SZ')
+                dt1 = datetime.datetime.utcfromtimestamp(d['eventStopTime']/1000).replace(tzinfo=pytz.UTC)
             except ValueError as e:
-                logging.warning(e)
+                logging.error(e)
                 continue
+        else:
+            dt1 = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
 
-        urls = client.instrument_to_query(d['ref_des'],
-                                          args.user,
-                                          stream=stream_name,
-                                          telemetry=args.telemetry,
-                                          time_delta_type=None,
-                                          time_delta_value=None,
-                                          begin_ts=d['eventStartTs'],
-                                          end_ts=d['eventStopTs'],
-                                          time_check=args.time_check,
-                                          exec_dpa=args.no_dpa,
-                                          application_type=args.format,
-                                          provenance=args.no_provenance,
-                                          limit=args.limit,
-                                          annotations=args.no_annotations,
-                                          email=args.email)
+        # Loop through each stream
+        for stream in streams:
+            
+            # Skip this stream if the user specified a target stream and this is
+            # not it
+            if args.stream and args.stream.find(stream['stream']) == -1:
+                logger.debug('Skipping unwanted stream ({:s})'.format(stream['stream']))
+                continue
+                
+            # Parse the stream beginTime
+            try:
+                st0 = parser.parse(stream['beginTime'])
+            except ValueError as e:
+                logger.error('Stream ({:s}) beginTime parse error - {:s}'.format(stream['stream'], e))
+                continue
+                
+            # Parse the stream beginTime
+            try:
+                st1 = parser.parse(stream['endTime'])
+            except ValueError as e:
+                logger.error('Stream ({:s}) endTime parse error - {:s}'.format(stream['stream'], e))
+                continue
+                
+            # Check stream endTime to make sure it's not before the deployment began
+            if st1 < dt0:
+                logger.warning('Stream ({:s}) ends before deployment event begins'.format(stream['stream']))
+                continue
+                
+            # Set the request start_date and end_date to the deployment window
+            start_date = dt0.strftime('%Y-%m-%dT%H:%M:%S.%sZ')
+            end_date = dt1.strftime('%Y-%m-%dT%H:%M:%S.%sZ')
+            
+            urls = client.instrument_to_query(d['ref_des'],
+                user,
+                stream=stream['stream'],
+                telemetry=args.telemetry,
+                time_delta_type=None,
+                time_delta_value=None,
+                begin_ts=start_date,
+                end_ts=end_date,
+                time_check=args.time_check,
+                exec_dpa=args.no_dpa,
+                application_type=args.format,
+                provenance=args.no_provenance,
+                limit=args.limit,
+                annotations=args.no_annotations,
+                email=args.email)
 
-        if not urls:
-            logger.debug('No deployment request urls created ({:s})'.format(d['ref_des']))
-            continue
-
-        request_urls = request_urls + urls
+            if not urls:
+                logger.debug('No deployment request urls created ({:s})'.format(d['ref_des']))
+                continue
+    
+            request_urls = request_urls + urls
 
     if not args.raw:
         request_urls = [urllib.quote(u) for u in request_urls]
