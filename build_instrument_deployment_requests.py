@@ -12,10 +12,8 @@ import urllib
 
 
 def main(args):
-    """Return the list of escaped request urls that conform to the UFrame API for the
-        partial or fully-qualified reference_designator and all telemetry types.  
-        The URLs request all stream L0, L1 and L2 dataset parameters over the entire 
-        time-coverage.  The urls are printed to STDOUT."""
+    """Return all asynchronous NetCDF data set request urls for all streams produced by the specified reference designator
+    for all deployments of the instrument(s)"""
 
     # Set up the lib.m2m.M2mClient logger
     logger = logging.getLogger(__name__)
@@ -125,7 +123,6 @@ def main(args):
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description=main.__doc__)
     arg_parser.add_argument('ref_des',
-                            nargs='+',
                             type=str,
                             help='Partial or fully-qualified reference designator identifying one or more instruments')
     arg_parser.add_argument('-u', '--user',
