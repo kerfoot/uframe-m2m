@@ -118,14 +118,14 @@ def main(args):
                 try:
                     st0 = parser.parse(stream['beginTime'])
                 except ValueError as e:
-                    logger.error('Stream ({:s}) beginTime parse error - {:s}'.format(stream['stream'], e))
+                    logger.error('{:s} beginTime parse error - {:s} ({:s})'.format(stream['stream'], e, stream['endTime']))
                     continue
                     
                 # Parse the stream beginTime
                 try:
                     st1 = parser.parse(stream['endTime'])
                 except ValueError as e:
-                    logger.error('Stream ({:s}) endTime parse error - {:s}'.format(stream['stream'], e))
+                    logger.error('{:s} endTime parse error - {:s} ({:s})'.format(stream['stream'], e, stream['endTime']))
                     continue
                     
                 # Check stream endTime to make sure it's not before the deployment began
