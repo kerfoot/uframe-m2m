@@ -82,7 +82,7 @@ class UFrameClient(object):
         self._logger.debug('UFrame m2m base_url: {:s}'.format(self.m2m_base_url))
 
         # Try to get the sensor invetory subsite list to see if we're able to connect
-        self.fetch_sensor_subsites()
+        self.fetch_subsites()
         if self._status_code != HTTP_STATUS_OK:
             self._logger.critical('Unable to connect to UFrame instance')
             return
@@ -96,6 +96,8 @@ class UFrameClient(object):
 
     @is_m2m.setter
     def is_m2m(self, status):
+        """Configures the instance to send requests either via the m2m <Default>
+        API or directly to the UFrame API"""
         if type(status) != bool:
             self._logger.error('status must be True or False')
             return
@@ -134,7 +136,7 @@ class UFrameClient(object):
     def instruments(self):
         return self._instruments
 
-    def fetch_sensor_subsites(self):
+    def fetch_subsites(self):
         """Fetch all registered subsites from the /sensor/inv API endpoint"""
 
         self._logger.debug('Fetching sensor subsites')

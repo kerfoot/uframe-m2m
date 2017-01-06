@@ -27,7 +27,7 @@ def main(args):
 
     client = UFrameClient(uframe_base_url, timeout=args.timeout)
     if args.inventory == 'sensor':
-        subsites = client.fetch_sensor_subsites()
+        subsites = client.fetch_subsites()
     else:
         subsites = client.fetch_deployment_subsites()
 
