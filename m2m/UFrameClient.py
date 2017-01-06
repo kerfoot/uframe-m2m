@@ -46,6 +46,7 @@ class UFrameClient(object):
         self._is_m2m = m2m
         self._instruments = []
         self._subsites = []
+        self._instrument_streams = []
 
         self._logger = logging.getLogger(__name__)
 
@@ -237,6 +238,12 @@ class UFrameClient(object):
         matching the fully or partially-qualified ref_des string"""
 
         return [i for i in self._instruments if i.find(ref_des) > -1]
+        
+    def stream_to_instruments(self, stream):
+        """Return the list of instruments that produce the specified full or partial
+        stream name"""
+        
+        return [i['instrument'] for i in self._instrument_streams if i['stream'].find(stream) > -1]
 
     def build_and_send_request(self, port, end_point):
         """Build and send the request url for the specified port and end_point"""
@@ -312,16 +319,19 @@ class UFrameClient(object):
         self._logger.debug('Creating instruments list')
         self.send_request(url)
 
-        instrument_regex = re.compile('>(\w+/\w+/\w+\-\w+)<')
+        instrument_regex = re.compile('<a href="/sensor/inv/(\w+)/(\w+)/(\w{2,}\-\w+)/\w+/(\w+)">')
         matches = instrument_regex.findall(self._response)
         if not matches:
             return
 
-        instruments = ['-'.join(m.split('/')) for m in matches]
+        # Create an array of dicts with the instrument name and the stream it produces
+        self._instrument_streams = [{'instrument' : '-'.join(m[:3]), 'stream' : m[-1]} for m in matches]
+        # Create the unique list of instruments
+        instruments = list(set([i['instrument'] for i in self._instrument_streams]))
         instruments.sort()
 
         self._instruments = instruments
-
+        
     def instrument_to_query(self, ref_des, user, stream=None, telemetry=None, time_delta_type=None,
                             time_delta_value=None, begin_ts=None, end_ts=None, time_check=True, exec_dpa=True,
                             application_type='netcdf', provenance=True, limit=-1, annotations=False, email=None):
