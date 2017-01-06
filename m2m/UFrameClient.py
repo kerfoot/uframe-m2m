@@ -47,6 +47,7 @@ class UFrameClient(object):
         self._instruments = []
         self._subsites = []
         self._instrument_streams = []
+        self._streams = []
 
         self._logger = logging.getLogger(__name__)
 
@@ -243,7 +244,7 @@ class UFrameClient(object):
         """Return the list of instruments that produce the specified full or partial
         stream name"""
         
-        return [i['instrument'] for i in self._instrument_streams if i['stream'].find(stream) > -1]
+        return [i for i in self._instrument_streams if i['stream'].find(stream) > -1]
 
     def build_and_send_request(self, port, end_point):
         """Build and send the request url for the specified port and end_point"""
@@ -326,10 +327,15 @@ class UFrameClient(object):
 
         # Create an array of dicts with the instrument name and the stream it produces
         self._instrument_streams = [{'instrument' : '-'.join(m[:3]), 'stream' : m[-1]} for m in matches]
+        
+        # Create the unique list of streams
+        streams = list(set([i['stream'] for i in self._instrument_streams]))
+        streams.sort()
+        self._streams = streams
+        
         # Create the unique list of instruments
         instruments = list(set([i['instrument'] for i in self._instrument_streams]))
         instruments.sort()
-
         self._instruments = instruments
         
     def instrument_to_query(self, ref_des, user, stream=None, telemetry=None, time_delta_type=None,
