@@ -55,6 +55,7 @@ class UFrameClient(object):
         self._request_url = None
         self._response = None
         self._status_code = None
+        self._reason = None
         self._response_headers = None
 
         # Set the base url
@@ -133,6 +134,10 @@ class UFrameClient(object):
     @property
     def last_status_code(self):
         return self._status_code
+
+    @property
+    def last_reason(self):
+        return self._reason
 
     @property
     def instruments(self):
@@ -272,6 +277,7 @@ class UFrameClient(object):
         self._request_url = url
         self._response = None
         self._status_code = None
+        self._reason = None
         self._response_headers = None
 
         if self.is_m2m and not url.startswith(self.m2m_base_url):
@@ -296,9 +302,10 @@ class UFrameClient(object):
             return
 
         self._status_code = r.status_code
+        self._reason = r.reason
         if self._status_code != HTTP_STATUS_OK:
             self._logger.error('Request failed {:s} ({:s})'.format(url, r.reason))
-            return
+#            return
 
         self._response_headers = r.headers
 
