@@ -22,7 +22,7 @@ def main(args):
     # UFrame instance
     uframe_base_url = args.base_url
     if not uframe_base_url:
-        uframe_base_url = os.getenv('UFRAME_M2M_BASE_URL')
+        uframe_base_url = os.getenv('UFRAME_BASE_URL')
         if not uframe_base_url:
             logging.error('No base_url set/found')
             return 1

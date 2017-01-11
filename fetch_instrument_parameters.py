@@ -21,7 +21,7 @@ def main(args):
     # UFrame instance
     uframe_base_url = args.base_url
     if not uframe_base_url:
-        uframe_base_url = os.getenv('UFRAME_M2M_BASE_URL')
+        uframe_base_url = os.getenv('UFRAME_BASE_URL')
         if not uframe_base_url:
             logging.error('No base_url set/found')
             return 1
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('-b', '--baseurl',
         dest='base_url',
         type=str,
-        help='UFrame m2m base url beginning with https.  Taken from UFRAME_M2M_BASE_URL if not specified')
+        help='UFrame m2m base url beginning with https.  Taken from UFRAME_BASE_URL if not specified')
     arg_parser.add_argument('-t', '--timeout',
         type=int,
         default=120,
