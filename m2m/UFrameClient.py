@@ -428,7 +428,7 @@ class UFrameClient(object):
 
             for instrument_stream in instrument_streams:
 
-                if telemetry and instrument_stream['method'].find(telemetry) == -1:
+                if telemetry and not instrument_stream['method'].startswith(telemetry):
                     continue
 
                 # Figure out what we're doing for time
