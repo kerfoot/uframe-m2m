@@ -24,12 +24,12 @@ def main(args):
     
     # Both args.username and args.password must be specified if either is specified
     auth = False
-    if args.username and args.password:
+    if args.apiusername and args.apipassword:
         auth = True
-    elif args.username and not args.password:
+    elif args.apiusername and not args.apipassword:
         logging.error('No API token specified')
         return 1
-    elif args.password and not args.username:
+    elif args.apipassword and not args.apiusername:
         logging.error('No API username specified')
         return 1
 
