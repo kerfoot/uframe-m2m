@@ -56,7 +56,7 @@ def main(args):
     responses = []
     for url in request_urls:
         
-        url = urllib.unquote(url.strip('/'))
+        url = urllib.unquote(url.strip('/')).strip()
         
         req = {u'url' : url,
             u'status_code' : None,
