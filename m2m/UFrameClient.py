@@ -22,21 +22,21 @@ _valid_relativedeltatypes = ('years',
 
 
 class UFrameClient(object):
-    """Lightweight OOI UFrame client for making GET requests to the UFrame API via
-    the machine to machine (m2m) API or directly to UFrame.
-    
-    Parameters:
-        base_url: UFrame API base url which must begin with https://
-        
-    kwargs:
-        m2m: If true <Default>, specifies that all requests should be created and sent throught the m2m API
-        timeout: request timeout, in seconds
-        api_username: API username from the UI user settings
-        api_token: API password from the UI user settings
-    """
 
     def __init__(self, base_url, m2m=True, timeout=120, api_username=None, api_token=None):
-
+        """Lightweight OOI UFrame client for making GET requests to the UFrame API via
+        the machine to machine (m2m) API or directly to UFrame.
+        
+        Parameters:
+            base_url: UFrame API base url which must begin with https://
+            
+        kwargs:
+            m2m: If true <Default>, specifies that all requests should be created and sent throught the m2m API
+            timeout: request timeout, in seconds
+            api_username: API username from the UI user settings
+            api_token: API password from the UI user settings
+        """
+        
         self._base_url = None
         self._m2m_base_url = None
         self._timeout = timeout
