@@ -22,10 +22,10 @@ def main(args):
     if not uframe_base_url:
         uframe_base_url = os.getenv('UFRAME_BASE_URL')
         if not uframe_base_url:
-            logger.error('No base_url set/found')
+            logging.error('No base_url set/found')
             return 1
 
-    client = UFrameClient(uframe_base_url, timeout=args.timeout)
+    client = UFrameClient(uframe_base_url, timeout=args.timeout, m2m=args.direct)
     instruments = client.search_instruments(args.ref_des)
     if not instruments:
         return 0
@@ -77,6 +77,9 @@ if __name__ == '__main__':
     arg_parser.add_argument('--csv',
         help='Print results as csv records',
         action='store_true')
+    arg_parser.add_argument('-d', '--direct',
+        action='store_false',
+        help='Send requests directly to UFrame, not via m2m (Not recommended)')
 
     parsed_args = arg_parser.parse_args()
 

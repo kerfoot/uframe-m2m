@@ -39,7 +39,7 @@ def main(args):
         user = os.getenv('UFRAME_USER')
 
 
-    client = UFrameClient(uframe_base_url, timeout=args.timeout)
+    client = UFrameClient(uframe_base_url, timeout=args.timeout, m2m=args.direct)
 
     urls = client.instrument_to_query(args.ref_des,
                                       args.user,
@@ -144,6 +144,10 @@ if __name__ == '__main__':
                             dest='email',
                             type=str,
                             help='Add an email address for emailing UFrame responses to the request once sent')
+    arg_parser.add_argument('-d', '--direct',
+        action='store_false',
+        help='Send requests directly to UFrame, not via m2m (Not recommended)')
+
 
     parsed_args = arg_parser.parse_args()
 

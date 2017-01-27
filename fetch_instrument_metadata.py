@@ -25,7 +25,7 @@ def main(args):
             logging.error('No base_url set/found')
             return 1
 
-    client = UFrameClient(uframe_base_url, timeout=args.timeout)
+    client = UFrameClient(uframe_base_url, timeout=args.timeout, args.direct)
     instruments = client.search_instruments(args.ref_des)
     if not instruments:
         return 0
@@ -62,6 +62,10 @@ if __name__ == '__main__':
         type=str,
         choices=['debug', 'info', 'warning', 'error', 'critical'],
         default='warning')
+    arg_parser.add_argument('-d', '--direct',
+        action='store_false',
+        help='Send requests directly to UFrame, not via m2m (Not recommended)')
+
 
     parsed_args = arg_parser.parse_args()
 

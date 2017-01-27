@@ -39,7 +39,7 @@ def main(args):
             return 1
         user = os.getenv('UFRAME_USER')
 
-    client = UFrameClient(uframe_base_url, timeout=args.timeout)
+    client = UFrameClient(uframe_base_url, timeout=args.timeout, m2m=args.direct)
 
     # Find all fully qualified reference designators
     all_deployments = client.fetch_instrument_deployments(args.ref_des)
@@ -237,6 +237,9 @@ if __name__ == '__main__':
                             dest='email',
                             type=str,
                             help='Add an email address for emailing UFrame responses to the request once sent')
+    arg_parser.add_argument('-d', '--direct',
+        action='store_false',
+        help='Send requests directly to UFrame, not via m2m (Not recommended)')
 
     parsed_args = arg_parser.parse_args()
 
