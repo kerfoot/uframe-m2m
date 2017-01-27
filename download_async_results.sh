@@ -42,6 +42,9 @@ DESCRIPTION
     -h
         show help message
 
+    -v
+        verbose wget output
+
     -x 
         dry run only. No files downloaded        
 
@@ -55,25 +58,22 @@ DESCRIPTION
 # Default values for options
 
 # Process options
-while getopts "hxu:d:p:f" option
+while getopts "hvxd:f" option
 do
     case "$option" in
         "h")
             echo -e "$USAGE";
             exit 0;
             ;;
+        "v")
+            verbose=1;
+            ;;
         "x")
             debug=1;
             ;;
-#        "u")
-#            user=$OPTARG;
-#            ;;
         "d")
             root=$OPTARG;
             ;;
-#        "p")
-#            prefix=$OPTARG;
-#            ;;
         "f")
             force=1;
             ;;
@@ -101,34 +101,24 @@ fi
 for f in "$@"
 do
 
+    [ ! -f "$f" ] && continue;
+
     url=$(cat $f | python -m json.tool | grep '/async_results/' | sed 's/[ "]//g');
-    if [ -n "$debug" ]
-    then
-        echo "URL: $url";
-        continue;
-    fi
+#    if [ -n "$debug" ]
+#    then
+#        echo "URL: $url";
+#        continue;
+#    fi
 
     # Get the async results user and timestamped stream directory
     url_user=$(echo $url | awk -F/ '{print $(NF-1)}');
     url_prefix=$(echo $url | awk -F/ '{print $NF}');
 
-    # Override the async results if specified via -u option
-    if [ -n "$user" ]
-    then
-        url_user=$user;
-    fi
-
-    # Override the async results if specified via -p option
-    if [ -n "$prefix" ]
-    then
-        url_prefix=$prefix;
-    fi
-
     # Create the destination
     dest="${root}/${url_user}/${url_prefix}";
     if [ -d "$dest" -a -z "$force" ]
     then
-        echo "Destination already exists.  Use -f to clobber";
+        echo "Destination already exists: $dest  [Use -f to clobber]" >&2;
         continue;
     fi
 
@@ -139,6 +129,17 @@ do
     then
         wget --spider \
             -r \
+            --no-parent \
+            -R index.* \
+            --no-check-certificate \
+            -nH \
+            --cut-dirs=3 \
+            -P $dest \
+            $url/;
+    elif [ -z "$verbose" ]
+    then
+        wget -r \
+            --quiet \
             --no-parent \
             -R index.* \
             --no-check-certificate \
