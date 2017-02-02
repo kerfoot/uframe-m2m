@@ -116,9 +116,9 @@ if __name__ == '__main__':
     arg_parser.add_argument('-f', '--file',
         type=str,
         help='Filename containing the list of whitespace separated asynchronous UFrame request urls')
-    arg_parser.add_argument('-o', '--outputfile',
-        type=str,
-        help='Write the UFrame JSON responses to the specified output file')
+    #arg_parser.add_argument('-o', '--outputfile',
+    #    type=str,
+    #    help='Write the UFrame JSON responses to the specified output file')
     arg_parser.add_argument('-t', '--timeout',
         type=int,
         default=120,
