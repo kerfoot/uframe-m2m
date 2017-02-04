@@ -17,6 +17,8 @@ from collections import OrderedDict
 def main(args):
     """Show the deployment status and stream particle overlap for all instruments"""
 
+    HTTP_STATUS_OK = 200
+
     # Set up the lib.m2m.M2mClient logger
     logger = logging.getLogger(__name__)
     log_level = getattr(logging, args.loglevel.upper())
@@ -45,6 +47,9 @@ def main(args):
         
         # Find all fully qualified reference designators
         all_deployments = client.fetch_instrument_deployments(instrument)
+        if client.last_status_code != HTTP_STATUS_OK:
+            continue
+        
         if not all_deployments:
             logger.debug('No deployments found for instrument {:s}'.format(instrument))
             continue
