@@ -25,7 +25,7 @@ def main(args):
             logging.error('No base_url set/found')
             return 1
 
-    client = UFrameClient(uframe_base_url, timeout=args.timeout, args.direct)
+    client = UFrameClient(uframe_base_url, timeout=args.timeout, m2m=args.direct)
     instruments = client.search_instruments(args.ref_des)
     if not instruments:
         return 0
