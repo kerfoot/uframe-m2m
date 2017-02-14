@@ -17,6 +17,8 @@ from collections import OrderedDict
 def main(args):
     """Show the deployment status and stream particle overlap for all instruments"""
 
+    HTTP_STATUS_OK = 200
+    
     # Set up the lib.m2m.M2mClient logger
     logger = logging.getLogger(__name__)
     log_level = getattr(logging, args.loglevel.upper())
@@ -32,7 +34,7 @@ def main(args):
             logging.error('No base_url set/found')
             return 1
 
-    client = UFrameClient(uframe_base_url, timeout=args.timeout, m2m=args.direct)
+    client = UFrameClient(uframe_base_url, timeout=args.timeout, m2m=args.m2m)
 
     ref_des = args.ref_des
     if not ref_des:
@@ -45,6 +47,9 @@ def main(args):
         
         # Find all fully qualified reference designators
         all_deployments = client.fetch_instrument_deployments(instrument)
+        if client.last_status_code != HTTP_STATUS_OK:
+            continue
+            
         if not all_deployments:
             logger.debug('No deployments found for instrument {:s}'.format(instrument))
             continue
@@ -193,6 +198,7 @@ if __name__ == '__main__':
                             default=120,
                             help='Request timeout, in seconds <Default:120>')
     arg_parser.add_argument('-d', '--direct',
+        dest='m2m',
         action='store_false',
         help='Send requests directly to UFrame, not via m2m (Not recommended)')
     
