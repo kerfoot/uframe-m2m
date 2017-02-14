@@ -1,0 +1,5 @@
+dateutils==0.6.6
+python-dateutil==2.5.3
+pytz==2016.6.1
+requests==2.11.0
+six==1.10.0
