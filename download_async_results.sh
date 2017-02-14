@@ -103,60 +103,69 @@ do
 
     [ ! -f "$f" ] && continue;
 
-    url=$(cat $f | python -m json.tool | grep '/async_results/' | sed 's/[ "]//g');
-#    if [ -n "$debug" ]
-#    then
-#        echo "URL: $url";
-#        continue;
-#    fi
-
-    # Get the async results user and timestamped stream directory
-    url_user=$(echo $url | awk -F/ '{print $(NF-1)}');
-    url_prefix=$(echo $url | awk -F/ '{print $NF}');
-
-    # Create the destination
-    dest="${root}/${url_user}/${url_prefix}";
-    if [ -d "$dest" -a -z "$force" ]
+    urls=$(cat $f | python -m json.tool | grep '/async_results/' | sed 's/[ "]//g');
+    if [ -z "$urls" ]
     then
-        echo "Destination already exists: $dest  [Use -f to clobber]" >&2;
+        echo "No async download directories found" >&2;
         continue;
     fi
 
-    echo "Fetching: $url";
-    echo "Destination: $dest";
-
-    if [ -n "$debug" ]
-    then
-        wget --spider \
-            -r \
-            --no-parent \
-            -R index.* \
-            --no-check-certificate \
-            -nH \
-            --cut-dirs=3 \
-            -P $dest \
-            $url/;
-    elif [ -z "$verbose" ]
-    then
-        wget -r \
-            --quiet \
-            --no-parent \
-            -R index.* \
-            --no-check-certificate \
-            -nH \
-            --cut-dirs=3 \
-            -P $dest \
-            $url/;
-    else
-        wget -r \
-            --no-parent \
-            -R index.* \
-            --no-check-certificate \
-            -nH \
-            --cut-dirs=3 \
-            -P $dest \
-            $url/;
-    fi
+    for url in $urls
+    do
+        if [ -n "$debug" ]
+        then
+            echo "$url";
+            continue;
+        fi
+    
+        # Get the async results user and timestamped stream directory
+        url_user=$(echo $url | awk -F/ '{print $(NF-1)}');
+        url_prefix=$(echo $url | awk -F/ '{print $NF}');
+    
+        # Create the destination
+        dest="${root}/${url_user}/${url_prefix}";
+        if [ -d "$dest" -a -z "$force" ]
+        then
+            echo "Destination already exists: $dest  [Use -f to clobber]" >&2;
+            continue;
+        fi
+    
+        echo "Fetching: $url";
+        echo "Destination: $dest";
+    
+        if [ -n "$debug" ]
+        then
+            wget --spider \
+                -r \
+                --no-parent \
+                -R index.* \
+                --no-check-certificate \
+                -nH \
+                --cut-dirs=3 \
+                -P $dest \
+                $url/;
+        elif [ -z "$verbose" ]
+        then
+            wget -r \
+                --quiet \
+                --no-parent \
+                -R index.* \
+                --no-check-certificate \
+                -nH \
+                --cut-dirs=3 \
+                -P $dest \
+                $url/;
+        else
+            wget -r \
+                --no-parent \
+                -R index.* \
+                --no-check-certificate \
+                -nH \
+                --cut-dirs=3 \
+                -P $dest \
+                $url/;
+        fi
+    done
 
 done
 
