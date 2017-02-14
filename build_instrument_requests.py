@@ -42,7 +42,7 @@ def main(args):
     client = UFrameClient(uframe_base_url, timeout=args.timeout, m2m=args.direct)
 
     urls = client.instrument_to_query(args.ref_des,
-                                      args.user,
+                                      user,
                                       stream=args.stream,
                                       telemetry=args.telemetry,
                                       time_delta_type=args.time_delta_type,
