@@ -154,7 +154,13 @@ class UFrameClient(object):
         request_url = self.build_request(port,
                                          end_point)
 
-        return self.send_request(request_url)
+        # Send the request
+        self.send_request(request_url)
+        
+        if self._status_code == HTTP_STATUS_OK:
+            return self._response
+        else:
+            return None
 
     def fetch_deployment_subsites(self):
         """Fetch all registered subsites from the /events/deployment/inv API
@@ -168,7 +174,13 @@ class UFrameClient(object):
         request_url = self.build_request(port,
                                          end_point)
 
-        return self.send_request(request_url)
+        # Send the request
+        self.send_request(request_url)
+        
+        if self._status_code == HTTP_STATUS_OK:
+            return self._response
+        else:
+            return None
 
     def fetch_instrument_streams(self, ref_des):
         """Fetch all streams produced by the fully-qualified reference designator"""
@@ -186,7 +198,13 @@ class UFrameClient(object):
         request_url = self.build_request(port,
                                          end_point)
 
-        return self.send_request(request_url)
+        # Send the request
+        self.send_request(request_url)
+        
+        if self._status_code == HTTP_STATUS_OK:
+            return self._response
+        else:
+            return None
 
     def fetch_instrument_parameters(self, ref_des):
         """Fetch all parameters in the streams produced by the fully-qualified
@@ -205,7 +223,13 @@ class UFrameClient(object):
         request_url = self.build_request(port,
                                          end_point)
 
-        return self.send_request(request_url)
+        # Send the request
+        self.send_request(request_url)
+        
+        if self._status_code == HTTP_STATUS_OK:
+            return self._response
+        else:
+            return None
 
     def fetch_instrument_metadata(self, ref_des):
         """Fetch all streams and all parameters produced by the fully-qualified
@@ -224,7 +248,13 @@ class UFrameClient(object):
         request_url = self.build_request(port,
                                          end_point)
 
-        return self.send_request(request_url)
+        # Send the request
+        self.send_request(request_url)
+        
+        if self._status_code == HTTP_STATUS_OK:
+            return self._response
+        else:
+            return None
 
     def fetch_instrument_deployments(self, ref_des):
         """Fetch all deployment events for the fully or partially qualified reference designator"""
@@ -237,7 +267,13 @@ class UFrameClient(object):
         request_url = self.build_request(port,
                                          end_point)
 
-        return self.send_request(request_url)
+        # Send the request
+        self.send_request(request_url)
+        
+        if self._status_code == HTTP_STATUS_OK:
+            return self._response
+        else:
+            return None
 
     def search_instruments(self, ref_des):
         """Search all instruments for the fully-qualified reference designators
@@ -254,9 +290,15 @@ class UFrameClient(object):
     def build_and_send_request(self, port, end_point):
         """Build and send the request url for the specified port and end_point"""
 
-        url = self.build_request(port, end_point)
+        request_url = self.build_request(port, end_point)
 
-        return self.send_request(url)
+        # Send the request
+        self.send_request(request_url)
+        
+        if self._status_code == HTTP_STATUS_OK:
+            return self._response
+        else:
+            return None
 
     def build_request(self, port, end_point):
         """Build the request url for the specified port and end_point"""
@@ -305,7 +347,6 @@ class UFrameClient(object):
         self._reason = r.reason
         if self._status_code != HTTP_STATUS_OK:
             self._logger.error('Request failed {:s} ({:s})'.format(url, r.reason))
-#            return
 
         self._response_headers = r.headers
 
@@ -314,26 +355,28 @@ class UFrameClient(object):
         except ValueError as e:
             self._logger.warning('{:s} ({:s})'.format(e, url))
             self._response = r.text
-
-        return self._response
-
+        
+        if self._status_code == HTTP_STATUS_OK:
+            return self._response
+        else:
+            return None
+            
     def _create_instrument_list(self):
 
         self._instruments = []
+        self._streams = []
+        self._instrument_streams = []
 
-        url = self.build_request(12576,
-                                 '/sensor/allstreams')
-
-        self._logger.debug('Creating instruments list')
-        self.send_request(url)
-
-        instrument_regex = re.compile('<a href="/sensor/inv/(\w+)/(\w+)/(\w{2,}\-\w+)/\w+/(\w+)">')
-        matches = instrument_regex.findall(self._response)
-        if not matches:
+        self._logger.debug('Fetching UFrame table of contents')
+        toc = self.build_and_send_request(12576, 'sensor/inv/toc')
+        if self.last_status_code != HTTP_STATUS_OK:
+            self._logger.error('Failed to create instruments list')
             return
 
+        self._logger.debug('Creating instruments list')
+
         # Create an array of dicts with the instrument name and the stream it produces
-        self._instrument_streams = [{'instrument' : '-'.join(m[:3]), 'stream' : m[-1]} for m in matches]
+        self._instrument_streams = [{'instrument' : i['reference_designator'], 'stream' : s['stream']} for i in toc['instruments'] for s in i['streams']]
         
         # Create the unique list of streams
         streams = list(set([i['stream'] for i in self._instrument_streams]))
@@ -344,6 +387,35 @@ class UFrameClient(object):
         instruments = list(set([i['instrument'] for i in self._instrument_streams]))
         instruments.sort()
         self._instruments = instruments
+
+# 2017-02-14: kerfoot@marine.rutgers.edu - replaced below with the TOC call above
+#    def _create_instrument_list(self):
+#
+#        self._instruments = []
+#
+#        url = self.build_request(12576,
+#                                 '/sensor/allstreams')
+#
+#        self._logger.debug('Creating instruments list')
+#        self.send_request(url)
+#
+#        instrument_regex = re.compile('<a href="/sensor/inv/(\w+)/(\w+)/(\w{2,}\-\w+)/\w+/(\w+)">')
+#        matches = instrument_regex.findall(self._response)
+#        if not matches:
+#            return
+#
+#        # Create an array of dicts with the instrument name and the stream it produces
+#        self._instrument_streams = [{'instrument' : '-'.join(m[:3]), 'stream' : m[-1]} for m in matches]
+#        
+#        # Create the unique list of streams
+#        streams = list(set([i['stream'] for i in self._instrument_streams]))
+#        streams.sort()
+#        self._streams = streams
+#        
+#        # Create the unique list of instruments
+#        instruments = list(set([i['instrument'] for i in self._instrument_streams]))
+#        instruments.sort()
+#        self._instruments = instruments
         
     def instrument_to_query(self, ref_des, user, stream=None, telemetry=None, time_delta_type=None,
                             time_delta_value=None, begin_ts=None, end_ts=None, time_check=True, exec_dpa=True,
