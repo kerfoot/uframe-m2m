@@ -18,11 +18,7 @@ def main(args):
     """Show the deployment status and stream particle overlap for all instruments"""
 
     HTTP_STATUS_OK = 200
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> 8a616a33d3e2643cf2518fbfd408537545cdd883
     # Set up the lib.m2m.M2mClient logger
     logger = logging.getLogger(__name__)
     log_level = getattr(logging, args.loglevel.upper())
@@ -53,11 +49,7 @@ def main(args):
         all_deployments = client.fetch_instrument_deployments(instrument)
         if client.last_status_code != HTTP_STATUS_OK:
             continue
-<<<<<<< HEAD
-            
-=======
-        
->>>>>>> 8a616a33d3e2643cf2518fbfd408537545cdd883
+
         if not all_deployments:
             logger.debug('No deployments found for instrument {:s}'.format(instrument))
             continue
