@@ -352,14 +352,17 @@ class UFrameClient(object):
 
         try:
             self._response = r.json()
+            # Return the json response if there was one
+            return self._response
         except ValueError as e:
             self._logger.warning('{:s} ({:s})'.format(e, url))
             self._response = r.text
-        
-        if self._status_code == HTTP_STATUS_OK:
-            return self._response
-        else:
             return None
+        
+        #if self._status_code == HTTP_STATUS_OK:
+        #    return self._response
+        #else:
+        #    return None
             
     def _create_instrument_list(self):
 
