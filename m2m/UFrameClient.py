@@ -44,6 +44,7 @@ class UFrameClient(object):
         self._api_token = api_token
         self._session = requests.Session()
         self._is_m2m = m2m
+        #self._valid_uframe = True
         self._instruments = []
         self._subsites = []
         self._instrument_streams = []
@@ -88,6 +89,7 @@ class UFrameClient(object):
         self.fetch_subsites()
         if self._status_code != HTTP_STATUS_OK:
             self._logger.critical('Unable to connect to UFrame instance')
+            #self._valid_uframe = False
             return
 
         # Create the instrument list
@@ -316,6 +318,10 @@ class UFrameClient(object):
         request is sent through the m2m API.  If set to False, the request is sent
         directly to UFrame"""
 
+        #if not self._valid_uframe:
+        #    self._logger.critical('Unable to connect to UFrame instance')
+        #    return
+
         self._request_url = url
         self._response = None
         self._status_code = None
@@ -330,7 +336,7 @@ class UFrameClient(object):
             return
 
         try:
-            self._logger.debug('Sending GET request: {:s}\n'.format(url))
+            self._logger.debug('Sending GET request: {:s}'.format(url))
             if self._api_username and self._api_token:
                 r = self._session.get(url,
                                       auth=(self._api_username,
