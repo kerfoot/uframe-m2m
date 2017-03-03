@@ -60,6 +60,9 @@ fi
 for f in "$@"
 do
 
+    good_count=0;
+    complete_count=0;
+
     [ ! -f "$f" ] && continue;
 
     urls=$(cat $f | python -m json.tool | grep '/async_results/' | sed 's/[ "]//g');
@@ -69,9 +72,6 @@ do
         continue;
     fi
 
-    good_count=0;
-    bad_count=0;
-    complete_count=0;
     all_status=0;
     for url in $urls
     do
@@ -107,16 +107,14 @@ do
         then
             good_count=$(( good_count+1 ));
         else
-            bad_count=$(( bad_count+1 ));
             all_status=1;
         fi
         
     done
 
-    # Report the results if -v specified
-    echo "$good_count/$complete_count requests completed";
-    echo "$bad_count/$complete_count requests in process";
+    echo "$good_count/$complete_count requests completed: $f";
 
 done
+
 
 exit $all_status;
