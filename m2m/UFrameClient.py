@@ -3,7 +3,7 @@ import requests
 import re
 from dateutil import parser
 from dateutil.relativedelta import relativedelta as tdelta
-from pytz import timezone
+import pytz
 
 # Disables SSL warnings
 import requests.packages.urllib3
@@ -471,14 +471,14 @@ class UFrameClient(object):
         end_dt = None
         if begin_ts:
             try:
-                begin_dt = parser.parse(begin_ts)
+                begin_dt = parser.parse(begin_ts).replace(tzinfo=pytz.UTC)
             except ValueError as e:
                 self._logger.error('Invalid begin_dt: {:s} ({:s})'.format(begin_ts, e.message))
                 return urls
 
         if end_ts:
             try:
-                end_dt = parser.parse(end_ts)
+                end_dt = parser.parse(end_ts).replace(tzinfo=pytz.UTC)
             except ValueError as e:
                 self._logger.error('Invalid end_dt: {:s} ({:s})'.format(end_ts, e.message))
                 return urls
