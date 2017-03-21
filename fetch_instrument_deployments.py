@@ -7,6 +7,7 @@ import logging
 import json
 import csv
 import datetime
+import pytz
 from m2m.UFrameClient import UFrameClient
 
 
@@ -41,11 +42,16 @@ def main(args):
 
         all_deployments = all_deployments + deployments
 
-    if args.status == 'active':
-        all_deployments = [d for d in all_deployments if not d['eventStopTime']]
-    elif args.status == 'inactive':
-        all_deployments = [d for d in all_deployments if d['eventStopTime']]
+    # Filter deployments based on deployment status
+    all_deployments = client.filter_deployments_by_status(all_deployments, args.status)
+    
+    #if args.status == 'active':
+    #    all_deployments = [d for d in all_deployments if not d['eventStopTime']]
+    #elif args.status == 'inactive':
+    #    all_deployments = [d for d in all_deployments if d['eventStopTime']]
 
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
+    
     for d in all_deployments:
         # Handle the inconsistent nature of the deployment asset management
         # schema
@@ -64,16 +70,18 @@ def main(args):
             logging.warning(e)
             d['eventStartTs'] = None
 
-        # Create the event start timestamp
+        # Create the event stop timestamp
         d['eventStopTs'] = None
         if d['eventStopTime']:
             d['active'] = False
             try:
-                d['eventStopTs'] = datetime.datetime.utcfromtimestamp(d['eventStopTime'] / 1000).strftime(
-                    '%Y-%m-%dT%H:%M:%SZ')
+                dt1 = datetime.datetime.utcfromtimestamp(d['eventStopTime']/1000).replace(tzinfo=pytz.UTC)
+                if dt1 >= now:
+                    d['active'] = True
+                d['eventStopTs'] = dt1.strftime('%Y-%m-%dT%H:%M:%SZ')
             except ValueError as e:
                 logging.warning(e)
-                d['eventStopTs'] = None
+            
         else:
             d['active'] = True
 
