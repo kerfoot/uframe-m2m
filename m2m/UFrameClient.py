@@ -3,6 +3,7 @@ import requests
 import re
 from dateutil import parser
 from dateutil.relativedelta import relativedelta as tdelta
+import datetime
 import pytz
 
 # Disables SSL warnings
@@ -11,6 +12,10 @@ import requests.packages.urllib3
 requests.packages.urllib3.disable_warnings()
 
 HTTP_STATUS_OK = 200
+
+DEPLOYMENT_STATUS_TYPES = ['all',
+    'active',
+    'inactive']
 
 _valid_relativedeltatypes = ('years',
                              'months',
@@ -276,6 +281,39 @@ class UFrameClient(object):
             return self._response
         else:
             return None
+            
+    def filter_deployments_by_status(self, deployments, status='all'):
+        
+        if status not in DEPLOYMENT_STATUS_TYPES:
+            self._logger.error('Invalid deployment status type specified {:s}'.format(status))
+            return
+            
+        filtered_deployments = []
+        
+        if status == 'all':
+            return deployments
+            
+        now = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)    
+        if status == 'active':
+            for d in deployments:
+                if not d['eventStopTime']:
+                    filtered_deployments.append(d)
+                    continue
+                    
+                dt1 = datetime.datetime.utcfromtimestamp(d['eventStopTime']/1000).replace(tzinfo=pytz.UTC)
+                if dt1 >= now:
+                    filtered_deployments.append(d)
+        else:
+            for d in deployments:
+                if not d['eventStopTime']:
+                    continue
+                    
+                dt1 = datetime.datetime.utcfromtimestamp(d['eventStopTime']/1000).replace(tzinfo=pytz.UTC)
+                if dt1 < now:
+                    filtered_deployments.append(d)
+                    
+        return filtered_deployments
+        
 
     def search_instruments(self, ref_des):
         """Search all instruments for the fully-qualified reference designators
