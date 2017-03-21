@@ -43,6 +43,7 @@ def main(args):
         instruments = client.search_instruments(args.ref_des)
         
     deployment_status = []
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
     for instrument in instruments:
         
         # Find all fully qualified reference designators
@@ -54,10 +55,13 @@ def main(args):
             logger.debug('No deployments found for instrument {:s}'.format(instrument))
             continue
     
-        if args.status == 'active':
-            all_deployments = [d for d in all_deployments if not d['eventStopTime']]
-        elif args.status == 'inactive':
-            all_deployments = [d for d in all_deployments if d['eventStopTime']]
+        # Filter deployments based on deployment status
+        all_deployments = client.filter_deployments_by_status(all_deployments, args.status)
+        
+        #if args.status == 'active':
+        #    all_deployments = [d for d in all_deployments if not d['eventStopTime']]
+        #elif args.status == 'inactive':
+        #    all_deployments = [d for d in all_deployments if d['eventStopTime']]
             
         if not all_deployments:
             if args.status != 'all':     
@@ -91,14 +95,18 @@ def main(args):
                 logging.error(e)
                 continue
             # Parse eventStopTime if there is one
+            # Create the event stop timestamp
+            active_status = True
+            dt1 = None
             if d['eventStopTime']:
                 try:
                     dt1 = datetime.datetime.utcfromtimestamp(d['eventStopTime']/1000).replace(tzinfo=pytz.UTC)
+                    if dt1 < now:
+                        active_status = False
+                    d['eventStopTs'] = dt1.strftime('%Y-%m-%dT%H:%M:%SZ')
                 except ValueError as e:
-                    logging.error(e)
-                    continue
-            else:
-                dt1 = None
+                    logging.warning(e)
+                    dt1 = None
     
             # Loop through each stream
             for stream in streams:
@@ -115,9 +123,7 @@ def main(args):
                 status['stream_start_time'] = stream['beginTime']
                 status['stream_end_time'] = stream['endTime']
                 status['stream_particle_count'] = stream['count']
-                
-                if not dt1:
-                    status['active'] = True
+                status['active'] = active_status
                     
                 # Parse the stream beginTime
                 try:
