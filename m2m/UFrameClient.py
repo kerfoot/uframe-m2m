@@ -195,6 +195,9 @@ class UFrameClient(object):
         self._logger.debug('{:s} - Fetching instrument streams'.format(ref_des))
 
         r_tokens = ref_des.split('-')
+        if len(r_tokens) != 4:
+            self._logger.error('Incomplete reference designator specified {:s}'.format(ref_des))
+            return None
 
         port = 12576
         end_point = '/sensor/inv/{:s}/{:s}/{:s}-{:s}/metadata/times'.format(r_tokens[0],
@@ -245,7 +248,10 @@ class UFrameClient(object):
         self._logger.debug('{:s} - Fetching instrument metadata'.format(ref_des))
 
         r_tokens = ref_des.split('-')
-
+        if len(r_tokens) != 4:
+            self._logger.error('Incomplete reference designator specified {:s}'.format(ref_des))
+            return None
+            
         port = 12576
         end_point = '/sensor/inv/{:s}/{:s}/{:s}-{:s}/metadata'.format(r_tokens[0],
                                                                       r_tokens[1],
@@ -266,7 +272,7 @@ class UFrameClient(object):
     def fetch_instrument_deployments(self, ref_des):
         """Fetch all deployment events for the fully or partially qualified reference designator"""
 
-        self._logger.debug('{:s} - Fetching instrument deployments'.format(ref_des))
+        self._logger.debug('Fetching {:s} deployments'.format(ref_des))
 
         port = 12587
         end_point = '/events/deployment/query?refdes={:s}'.format(ref_des)
