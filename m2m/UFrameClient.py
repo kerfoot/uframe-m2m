@@ -149,6 +149,10 @@ class UFrameClient(object):
     @property
     def instruments(self):
         return self._instruments
+        
+    @property
+    def streams(self):
+        return self._streams
 
     def fetch_subsites(self):
         """Fetch all registered subsites from the /sensor/inv API endpoint"""
