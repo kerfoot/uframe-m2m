@@ -7,6 +7,11 @@ import logging
 import json
 import csv
 from m2m.UFrameClient import UFrameClient
+# Disables SSL warnings
+import requests.packages.urllib3
+
+requests.packages.urllib3.disable_warnings()
+
 
 def main(args):
     '''Fetch all registered subsites from the /sensor/inv API endpoint'''
