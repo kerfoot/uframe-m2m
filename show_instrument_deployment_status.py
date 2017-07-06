@@ -111,6 +111,9 @@ def main(args):
             # Loop through each stream
             for stream in streams:
                 
+                if args.telemetry and stream['method'].find(args.telemetry) == -1:
+                    continue
+                    
                 status = OrderedDict()
                 status['reference_designator'] = d['ref_des']
                 status['stream'] = stream['stream']
