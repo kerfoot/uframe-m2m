@@ -8,6 +8,7 @@ import logging
 import json
 import csv
 import urllib
+import re
 
 # Disables SSL warnings
 import requests.packages.urllib3
@@ -22,6 +23,11 @@ def main(args):
     log_format = '%(module)s:%(levelname)s:%(message)s'
     logging.basicConfig(format=log_format, level=log_level)
     
+    if args.outputdir:
+        if not os.path.isdir(args.outputdir):
+            logging.error('Invalid outputdir specified: {:s}'.format(args.outputdir))
+            return 1
+            
     # Both args.username and args.password must be specified if either is specified
     auth = False
     if args.apiusername and args.apipassword:
@@ -56,14 +62,30 @@ def main(args):
     responses = []
     for url in request_urls:
         
+        if url.startswith('#'):
+            continue
+            
         url = urllib.unquote(url.strip('/')).strip()
         
         req = {u'url' : url,
             u'status_code' : None,
-            u'response' : None}
+            u'response' : None,
+            u'response_file' : None}
         
         logging.debug('Sending GET request: {:s}'.format(url))
         
+        if args.outputdir:
+            # Make sure we can parse the url to create an outputfile
+            stream_regexp = re.compile(r'([A-Z0-9]{8}[/\w\d\-]+)\?')
+            match = stream_regexp.search(url)
+            if not match:
+                logging.warning('Unable to find ref_des,stream in url: {:s}'.format(url))
+                continue
+            response_path = '{:s}-response.json'.format('-'.join(match.groups()[0].split('/')))
+            req['response_file'] = os.path.join(args.outputdir, response_path)
+
+        if not args.m2m:
+            r = requests.get(url, verify=False)
         try:
             if auth:
                 logging.debug('GET with user-supplied credentials')
@@ -95,8 +117,18 @@ def main(args):
     if not responses:
         return 1
         
-    # Print responses as valid JSON
-    sys.stdout.write('{:s}\n'.format(json.dumps(responses)))
+    if args.outputdir:
+        for response in responses:
+            try:
+                with open(response['response_file'], 'w') as fid:
+                    json.dump(response, fid)
+            except IOError as e:
+                logging.error('Error writing response file ({:s}): {:s}'.format(e, response['response_file']))
+                continue
+            
+    else:
+        # Print responses as valid JSON
+        sys.stdout.write('{:s}\n'.format(json.dumps(responses)))
             
     return 0
 
@@ -116,13 +148,17 @@ if __name__ == '__main__':
     arg_parser.add_argument('-f', '--file',
         type=str,
         help='Filename containing the list of whitespace separated asynchronous UFrame request urls')
-    #arg_parser.add_argument('-o', '--outputfile',
-    #    type=str,
-    #    help='Write the UFrame JSON responses to the specified output file')
+    arg_parser.add_argument('--outputdir',
+        type=str,
+        help='Write the UFrame JSON responses to individual files in outputdir')
     arg_parser.add_argument('-t', '--timeout',
         type=int,
         default=120,
         help='Request timeout, in seconds <Default=120>')
+    arg_parser.add_argument('-d', '--direct',
+        dest='m2m',
+        action='store_false',
+        help='Send requests directly to UFrame, not via m2m (Not recommended)')
     arg_parser.add_argument('-l', '--loglevel',
         help='Verbosity level <Default=warning>',
         type=str,
