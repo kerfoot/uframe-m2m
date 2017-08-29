@@ -571,6 +571,8 @@ class UFrameClient(object):
 
                 try:
                     stream_dt1 = parser.parse(instrument_stream['endTime'])
+                    # Add 1 second to stream end time to account for milliseconds
+                    stream_dt1 = stream_dt1 + tdelta(seconds=1)
                 except ValueError:
                     self._logger.error(
                         '{:s}-{:s}: Invalid endTime ({:s})'.format(
