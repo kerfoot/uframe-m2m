@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash --
 #
 # USAGE:
 #
@@ -115,7 +115,6 @@ do
         if [ -n "$debug" ]
         then
             echo "$url";
-            continue;
         fi
     
         # Get the async results user and timestamped stream directory
@@ -141,9 +140,14 @@ do
                 -R index.* \
                 --no-check-certificate \
                 -nH \
-                --cut-dirs=3 \
+                --cut-dirs=4 \
                 -P $dest \
                 $url/;
+            if [ "$?" -ne 0 ]
+            then
+                echo "Download failed: $url";
+            fi
+            rm -Rf $dest;
         elif [ -z "$verbose" ]
         then
             wget -r \
@@ -152,7 +156,7 @@ do
                 -R index.* \
                 --no-check-certificate \
                 -nH \
-                --cut-dirs=3 \
+                --cut-dirs=4 \
                 -P $dest \
                 $url/;
         else
@@ -161,7 +165,7 @@ do
                 -R index.* \
                 --no-check-certificate \
                 -nH \
-                --cut-dirs=3 \
+                --cut-dirs=4 \
                 -P $dest \
                 $url/;
         fi
