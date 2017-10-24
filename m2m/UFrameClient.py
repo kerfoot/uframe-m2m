@@ -12,6 +12,7 @@ import requests.packages.urllib3
 requests.packages.urllib3.disable_warnings()
 
 HTTP_STATUS_OK = 200
+HTTP_STATUS_NOT_FOUND = 404
 
 DEPLOYMENT_STATUS_TYPES = ['all',
     'active',
@@ -399,7 +400,9 @@ class UFrameClient(object):
 
         self._status_code = r.status_code
         self._reason = r.reason
-        if self._status_code != HTTP_STATUS_OK:
+        if self._status_code == HTTP_STATUS_NOT_FOUND:
+            self._logger.warning('{:s}: {:s}'.format(r.reason, url))
+        elif self._status_code != HTTP_STATUS_OK:
             self._logger.error('Request failed {:s} ({:s})'.format(url, r.reason))
 
         self._response_headers = r.headers
