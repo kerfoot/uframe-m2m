@@ -95,6 +95,7 @@ class UFrameClient(object):
         self.fetch_subsites()
         if self._status_code != HTTP_STATUS_OK:
             self._logger.critical('Unable to connect to UFrame instance')
+            self._base_url = None
             #self._valid_uframe = False
             return
 
@@ -197,7 +198,7 @@ class UFrameClient(object):
     def fetch_instrument_streams(self, ref_des):
         """Fetch all streams produced by the fully-qualified reference designator"""
 
-        self._logger.debug('{:s} - Fetching instrument streams'.format(ref_des))
+        self._logger.debug('Fetching {:s} streams'.format(ref_des))
 
         r_tokens = ref_des.split('-')
         if len(r_tokens) != 4:
@@ -219,7 +220,7 @@ class UFrameClient(object):
         if self._status_code == HTTP_STATUS_OK:
             return self._response
         else:
-            return None
+            return []
 
     def fetch_instrument_parameters(self, ref_des):
         """Fetch all parameters in the streams produced by the fully-qualified
