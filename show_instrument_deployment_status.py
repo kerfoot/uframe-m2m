@@ -42,7 +42,7 @@ def main(args):
     else:
         instruments = client.search_instruments(args.ref_des)
         
-    deployment_status = []
+    deployment_status = {'uframe': client.base_url, 'deployments' : []}
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
     for instrument in instruments:
         
@@ -155,19 +155,19 @@ def main(args):
                 else:
                     status['deployment_end_time'] = dt1
         
-                deployment_status.append(status)
+                deployment_status['deployments'].append(status)
 
-    if not deployment_status:
+    if not deployment_status['deployments']:
         logging.warning('No valid instrument deployments found')
         return 0
         
     if args.csv:
         csv_writer = csv.writer(sys.stdout)
-        csv_writer.writerow(deployment_status[0].keys())
-        for deployment in deployment_status:
+        csv_writer.writerow(deployment_status['deployments'][0].keys())
+        for deployment in deployment_status['deployments']:
             csv_writer.writerow(deployment.values())
     else:
-        sys.stdout.write('{:s}\n'.format(json.dumps(deployment_status)))
+        sys.stdout.write('{:s}\n'.format(json.dumps(deployment_status, indent=4, sort_keys=True)))
 
     return 0
 
