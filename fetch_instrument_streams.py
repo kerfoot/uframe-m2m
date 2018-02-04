@@ -51,7 +51,7 @@ def main(args):
             csv_writer.writerow([stream[c] for c in cols])
 
     else:
-        sys.stdout.write('{:s}\n'.format(json.dumps(all_streams)))
+        sys.stdout.write('{:s}\n'.format(json.dumps(all_streams, indent=4)))
 
     return 0
 
