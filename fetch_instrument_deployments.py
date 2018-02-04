@@ -102,7 +102,7 @@ def main(args):
             csv_writer.writerow([deployment[c] for c in cols])
 
     else:
-        sys.stdout.write('{:s}\n'.format(json.dumps(all_deployments)))
+        sys.stdout.write('{:s}\n'.format(json.dumps(all_deployments, sort_keys=True, indent=4)))
 
     return 0
 
@@ -111,6 +111,7 @@ if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description=main.__doc__)
     arg_parser.add_argument('ref_des',
                             type=str,
+                            nargs='?',
                             help='Fully-qualified instrument reference designator')
     arg_parser.add_argument('-s', '--status',
                             dest='status',
