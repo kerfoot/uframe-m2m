@@ -58,7 +58,7 @@ def main(args):
                                       email=args.email)
 
     if not args.raw:
-        urls = [urllib.quote(u) for u in urls]
+        urls = [urllib.parse.quote(u) for u in urls]
 
     if args.csv:
         for url in urls:
