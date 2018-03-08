@@ -42,7 +42,7 @@ def main(args):
     # Fetch the streams produced by the instrument
     stream_metadata = client.fetch_instrument_streams(args.ref_des)
     if args.stream not in [s['stream'] for s in stream_metadata]:
-        logger.warning('Instrument does not produce the specified stream: {:s}'.format(args.stream))
+        logger.warning('{:s} does not produce the specified stream: {:s}'.format(args.ref_des, args.stream))
         return 1
 
     urls = client.instrument_to_query(args.ref_des,
@@ -61,7 +61,7 @@ def main(args):
     # Dump the GET request only if args.printurl
     if args.printurl:
         if not args.raw:
-            urls = [urllib.parse.quote(u) for u in urls]
+            urls = [urllib.quote(u) for u in urls]
         if args.csv:
             for url in urls:
                 sys.stdout.write('{:s}\n'.format(url))
@@ -161,6 +161,7 @@ if __name__ == '__main__':
 
     arg_parser.add_argument('--time_delta_value',
                             type=int,
+                            default=1,
                             help='Positive integer value to subtract from the end time to get the request start time.')
 
     arg_parser.add_argument('--no_dpa',
