@@ -395,7 +395,7 @@ class UFrameClient(object):
                                       verify=False)
             else:
                 r = self._session.get(url, timeout=self._timeout, verify=False)
-        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError) as e:
+        except (requests.exceptions.ReadTimeout, requests.exceptions.MissingSchema, requests.exceptions.ConnectionError) as e:
             self._logger.error('{:s} - {:s}'.format(e, url))
             return
 
@@ -549,8 +549,9 @@ class UFrameClient(object):
                     self._logger.warning('Invalid stream: {:s}-{:s}'.format(instrument, stream))
                     continue
 
-                i = stream_names.index(stream)
-                instrument_streams = [instrument_streams[i]]
+                instrument_streams = [s for s in instrument_streams if s['stream'] == stream]
+#                i = stream_names.index(stream)
+#                instrument_streams = [instrument_streams[i]]
 
             if not instrument_streams:
                 self._logger.info('{:s}: No streams found'.format(instrument))
