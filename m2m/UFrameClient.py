@@ -55,6 +55,7 @@ class UFrameClient(object):
         self._subsites = []
         self._instrument_streams = []
         self._streams = []
+        self._toc = None
 
         self._logger = logging.getLogger(__name__)
 
@@ -155,6 +156,22 @@ class UFrameClient(object):
     @property
     def streams(self):
         return self._streams
+
+    @property
+    def toc(self):
+        return self._toc
+
+    def fetch_table_of_contents(self):
+
+        toc = self.build_and_send_request(12576, 'sensor/inv/toc')
+        if self.last_status_code != HTTP_STATUS_OK:
+            self._logger.error('Failed to create instruments list')
+            return
+
+        # Save the table of contents if we fetch it
+        self._toc = toc
+
+        return True
 
     def fetch_subsites(self):
         """Fetch all registered subsites from the /sensor/inv API endpoint"""
@@ -429,15 +446,19 @@ class UFrameClient(object):
         self._instrument_streams = []
 
         self._logger.debug('Fetching UFrame table of contents')
-        toc = self.build_and_send_request(12576, 'sensor/inv/toc')
-        if self.last_status_code != HTTP_STATUS_OK:
-            self._logger.error('Failed to create instruments list')
-            return
+        if not self._toc:
+            self.fetch_table_of_contents()
+            # toc = self.build_and_send_request(12576, 'sensor/inv/toc')
+            # if self.last_status_code != HTTP_STATUS_OK:
+            #     self._logger.error('Failed to create instruments list')
+            #     return
+            # # Save the table of contents if we fetch it
+            # self._toc = toc
 
         self._logger.debug('Creating instruments list')
 
         # Create an array of dicts with the instrument name and the stream it produces
-        self._instrument_streams = [{'instrument' : i['reference_designator'], 'stream' : s['stream']} for i in toc['instruments'] for s in i['streams']]
+        self._instrument_streams = [{'instrument' : i['reference_designator'], 'stream' : s['stream']} for i in self._toc['instruments'] for s in i['streams']]
         
         # Create the unique list of streams
         streams = list(set([i['stream'] for i in self._instrument_streams]))
