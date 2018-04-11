@@ -177,7 +177,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('-b', '--baseurl',
                             dest='base_url',
                             type=str,
-                            help='UFrame m2m base url beginning with https.  Taken from UFRAME_BASE_URL if not specified')
+                            help='UFrame base url beginning with https.  Taken from UFRAME_BASE_URL if not specified')
 
     arg_parser.add_argument('-t', '--timeout',
                             type=int,
