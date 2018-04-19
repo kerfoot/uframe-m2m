@@ -1,6 +1,7 @@
 # uframe-m2m
 
-Exploring the Ocean Observatories Initiative's data portal via the command
-line
+Simple OOI UFrame machine to machine (m2m) API client for querying the OOI data portal and requesting NetCDF data downloads.  The OOI data portal is located at:
 
-<a href="https://github.com/kerfoot/uframe-m2m/wiki"><h3>Documentation</h3></a>
+[https://ooinet.oceanobservatories.org](https://ooinet.oceanobservatories.org)
+
+<a href="https://github.com/kerfoot/uframe-m2m/wiki"><h3>Wiki Documentation</h3></a>
