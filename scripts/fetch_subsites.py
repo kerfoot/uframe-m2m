@@ -10,8 +10,6 @@ from m2m.UFrameClient import UFrameClient
 # Disables SSL warnings
 import requests.packages.urllib3
 
-requests.packages.urllib3.disable_warnings()
-
 
 def main(args):
     """Fetch all registered subsites from UFrame and print as valid JSON"""
