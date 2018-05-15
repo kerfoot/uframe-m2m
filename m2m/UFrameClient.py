@@ -413,7 +413,7 @@ class UFrameClient(object):
             else:
                 r = self._session.get(url, timeout=self._timeout, verify=False)
         except (requests.exceptions.ReadTimeout, requests.exceptions.MissingSchema, requests.exceptions.ConnectionError) as e:
-            self._logger.error('{:s} - {:s}'.format(e, url))
+            self._logger.error('{:} - {:s}'.format(e, url))
             return
 
         self._status_code = r.status_code
@@ -430,7 +430,7 @@ class UFrameClient(object):
             # Return the json response if there was one
             return self._response
         except ValueError as e:
-            self._logger.warning('{:s} ({:s})'.format(e, url))
+            self._logger.warning('{:} ({:s})'.format(e, url))
             self._response = r.text
             return None
         
